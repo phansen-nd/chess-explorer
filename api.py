@@ -20,6 +20,7 @@ def get_games_for(username, month, year):
     r = requests.get(url)
     gamesJson = r.json()["games"]
     
+    print()
     for gameJson in gamesJson:
         game = from_dict(Game, gameJson)
         userGame = UserGame(game, 'twopats')

@@ -35,7 +35,7 @@ class UserStats:
     chess_blitz: TypeStats
 
     def print_stats(self):
-        print('type\tcurrent\tbest\trecord (w/l(d))')
+        print('\ntype\tcurrent\tbest\trecord (w/l(d))')
         print('rapid\t' + self.chess_rapid.to_str())
         print('blitz\t' + self.chess_blitz.to_str())
         print('bullet\t' + self.chess_bullet.to_str())
