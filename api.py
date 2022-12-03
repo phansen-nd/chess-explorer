@@ -17,11 +17,6 @@ def get_stats_for(username):
 
 def get_games_for(username, month, year):
     url = 'https://api.chess.com/pub/player/{}/games/{}/{}'.format(username, year, month)
-    r = requests.get(url)
-    gamesJson = r.json()["games"]
-    
-    print()
-    for gameJson in gamesJson:
-        game = from_dict(Game, gameJson)
-        userGame = UserGame(game, 'twopats')
-        userGame.print_game()
+    gamesJson = requests.get(url).json()
+    games = from_dict(GameMonth, gamesJson)
+    games.print_games_for(username)

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 @dataclass
 class PlayerColor:
@@ -37,3 +38,13 @@ class UserGame:
 
     def print_game(self):
         print(self.result() + '\t' + self.played_as() + '\t' + self.game.time_class)
+
+@dataclass
+class GameMonth:
+    games: List[Game]
+
+    def print_games_for(self, username):
+        print()
+        for game in self.games:
+            userGame = UserGame(game, username)
+            userGame.print_game()
