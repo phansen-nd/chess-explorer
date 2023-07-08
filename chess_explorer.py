@@ -29,7 +29,7 @@ if __name__ == '__main__':
     games = api.get_all_games("twopats")
     with open('games.csv', 'w') as games_csv:
         writer = csv.writer(games_csv)
-        writer.writerow(['Date', 'Time', 'Time class', 'Played as', 'Outcome', 'Rating after', 'Opp. rating'])
+        writer.writerow(['Date', 'Time', 'Time class', 'Played as', 'Outcome', 'Rating after', 'Opponent', 'Opp. rating'])
         for game in games:
 
             headers = getattr(game.game.get_pgn(), 'headers', {
@@ -44,5 +44,6 @@ if __name__ == '__main__':
                 game.played_as(), 
                 game.result(), 
                 game.ending_rating(), 
-                game.opponent_rating()
+                game.opponent_name(),
+                game.opponent_rating(),
             ])
