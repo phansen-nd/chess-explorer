@@ -1,25 +1,56 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, InitVar, field
 from typing import List
+from enum import Enum
+from typing import Optional
+import io
+import chess.pgn
+
+class Result(Enum):
+    WIN = 'win'
+    TIMEOUT = 'timeout'
+    RESIGNED = 'resigned'
+    REPETITION = 'repetition'
+    CHECKMATED = 'checkmated'
+    INSUFFICIENT = 'insufficient'
+    AGREED = 'agreed'
+    STALEMATE = 'stalemate'
+    ABANDONED = 'abandoned'
+    TIMEvsINSUFFICIENT = 'timevsinsufficient'
+    BUGHOUSE = 'bughousepartnerlose'
+    MOVES = '50move'
 
 @dataclass
 class PlayerColor:
     rating: int
-    result: str
     username: str
+    _result: Result = field(init=False)
+    result: InitVar[str]
+
+    def __post_init__(self, result):
+        self._result = Result(result)
 
 @dataclass
 class Game:
     time_class: str
     white: PlayerColor
     black: PlayerColor
+    pgn: InitVar[Optional[str]] = None
+
+    def __post_init__(self, pgn):
+        if pgn is not None:
+            self.pgn = pgn
 
     def winning_color(self) -> str:
-        if self.white.result == 'win': return 'white'
-        elif self.black.result == 'win': return 'black'
+        if self.white._result == Result.WIN: return 'white'
+        elif self.black._result == Result.WIN: return 'black'
         else: return 'draw'
 
     def user_color(self, username) -> str:
-        return 'white' if self.white.username == username else 'black'    
+        return 'white' if self.white.username == username else 'black'
+    
+    def get_pgn(self) -> Optional[chess.pgn.Game]:
+        pgnIn = io.StringIO(self.pgn)
+        return chess.pgn.read_game(pgnIn)
 
 class UserGame:
     def __init__(self, game, username):
@@ -33,11 +64,20 @@ class UserGame:
         return self.game.user_color(self.username) == self.game.winning_color()
 
     def result(self) -> str:
-        if self.game.winning_color() == 'draw': return '-'
-        return 'w' if self.is_winner() else 'l'
+        return self.game.white._result if self.game.white.username == self.username else self.game.black._result
 
     def print_game(self):
         print(self.result() + '\t' + self.played_as() + '\t' + self.game.time_class)
+
+    def opponent_name(self) -> str:
+        return self.game.black.username if self.played_as() == 'white' else self.game.white.username
+    
+    def opponent_rating(self) -> int:
+        return self.game.black.rating if self.played_as() == 'white' else self.game.white.rating
+    
+    def ending_rating(self) -> int:
+        return self.game.black.rating if self.played_as() == 'black' else self.game.white.rating
+
 
 @dataclass
 class GameMonth:
@@ -48,3 +88,7 @@ class GameMonth:
         for game in self.games:
             userGame = UserGame(game, username)
             userGame.print_game()
+
+@dataclass
+class Archive:
+    archives: List[str]
